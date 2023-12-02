@@ -29,7 +29,6 @@ export const IssueView = () => {
       {commentsQuery.data?.map((issue) => (
         <IssueComment key={issue.id} issue={issue} />
       ))}
-      {/* <IssueComment body={comment3} /> */}
     </div>
   )
 }

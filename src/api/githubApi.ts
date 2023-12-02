@@ -1,9 +1,12 @@
 import axios from 'axios'
+import { getEnvVariables } from '../issues/helpers/getEnvVariables'
+
+const { VITE_AUTHENTICATION_TOKEN } = getEnvVariables()
 
 export const githubApi = axios.create({
   baseURL: 'https://api.github.com/repos/facebook/react',
   headers: {
     Authorization:
-      'Bearer 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',
+      `Bearer ${VITE_AUTHENTICATION_TOKEN}`,
   },
 })
