@@ -5,6 +5,7 @@ import { FiInfo, FiMessageSquare, FiCheckCircle } from 'react-icons/fi'
 
 import { Issue, State } from '../interfaces'
 import { getIssueComments, getIssueInfo } from '../hooks'
+import { timeSince } from '../helpers'
 
 interface Props {
   issue: Issue
@@ -32,7 +33,7 @@ export const IssueItem: FC<Props> = ({ issue }) => {
   const preSetData = () => {
     // Con el metodo setQueryData puedo tomar los datos almacenados en cache que ya fueron solicitados anteriormente por otra solicitud y almacenarlos en una key que sera usada en otro momento, por ej, en este caso especifico para cargar la lista de todas las issues se tiene que realizar una peticion, la cual me retorna un arreglo de issues y las guardo en la cache con la key ['issues'], ahora cada issue de ese arreglo tiene la misma informacion que me retorna la peticion que se realiza cuando entro a cada issue individualmente, entonces en vez de realizar una peticion cada vez que paso el mouse por encima de una issue, voy a crear una key llamada ['issue', issue.number] (el issue.number es el numero de la issue) y a esa key le voy a asignar la informacion de la "issue" que quedo guardada por la peticion anterior cuando se listaron todas las issues, en otras palabras, estamos reutilizando datos que quedaron guardados de otras peticiones
     queryClient.setQueryData(['issue', issue.number], issue, {
-      updatedAt: new Date().getTime() + 100000 // <-- Esta propiedad es solo de el metodo setQueryData y es para establecer hasta que hora la data se considerara como nueva o "fresh", en este caso la info sera fresh durante 1 min y medio, cuando se pase de ese tiempo, pasara al estado "stale", recordar que si una key esta en estado stale, cuando nos vallamos a otra pestaña del navegador y volvamos a la pagina, se volverán a disparar las peticiones para actualizar esos datos
+      updatedAt: new Date().getTime() + 100000, // <-- Esta propiedad es solo de el metodo setQueryData y es para establecer hasta que hora la data se considerara como nueva o "fresh", en este caso la info sera fresh durante 1 min y medio, cuando se pase de ese tiempo, pasara al estado "stale", recordar que si una key esta en estado stale, cuando nos vallamos a otra pestaña del navegador y volvamos a la pagina, se volverán a disparar las peticiones para actualizar esos datos
     })
 
     // Con este if pregunto si la key '['issue', issue.number, 'comments'])' existe en la cache de react query, si existe entonces ejecuta la peticion de adentro, crea la key y guarda los datos en la cache para ser usados si se accede a la issue
@@ -61,12 +62,23 @@ export const IssueItem: FC<Props> = ({ issue }) => {
           )}
         </div>
         <div className='col-8'>
-          <div className='d-flex flex-column flex-fill px-2'>
+          <div className='d-flex flex-column flex-fill'>
             <span>{issue.title}</span>
             <span className='issue-subinfo'>
-              #{issue.number} opened 2 days ago by{' '}
+              #{issue.number} opened {timeSince(issue.created_at)} ago by{' '}
               <span className='fw-bold'>{issue.user.login}</span>
             </span>
+            <div>
+              {issue.labels.map((label) => (
+                <span
+                  key={label.id}
+                  className='badge rounded-pill m-1'
+                  style={{ backgroundColor: `#${label.color}`, color: 'black' }}
+                >
+                  {label.name}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         <div className='col-3 d-flex g-0 justify-content-center align-items-center'>
@@ -76,7 +88,7 @@ export const IssueItem: FC<Props> = ({ issue }) => {
               alt='User Avatar'
               className='avatar me-4'
             />
-            <div>
+            <div className='d-flex align-items-center'>
               <span className='px-1'>{issue.comments}</span>
               <FiMessageSquare />
             </div>
